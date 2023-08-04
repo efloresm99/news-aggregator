@@ -1,0 +1,303 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "News Aggregator RESTful API",
+    "description": "This API allows you to search news taking as source of information the New York Times and The Guardian APIs.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/news/search"
+    }
+  ],
+  "tags": [
+    {
+      "name": "search",
+      "description": "This is the main endpoint. It allows you to search news in the API sources."
+    }
+  ],
+  "paths": {
+    "/api/news/search": {
+      "get": {
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "tags": [
+          "search"
+        ],
+        "summary": "This endpoint get the data from the sources based on the search query.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/q"
+          },
+          {
+            "$ref": "#/components/parameters/source"
+          },
+          {
+            "$ref": "#/components/parameters/page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/correctResponse"
+          },
+          "400": {
+            "$ref": "#/components/responses/badRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/notFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/serverError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "responses": {
+      "correctResponse": {
+        "description": "(OK) Data is retrieved correctly.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/correctResponse"
+              }
+            }
+          }
+        }
+      },
+      "badRequest": {
+        "description": "(Bad Request) Request is not well formatted.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/badRequest"
+            }
+          }
+        }
+      },
+      "notFound": {
+        "description": "(Not found) Request didn't get any value.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/notFound"
+            }
+          }
+        }
+      },
+      "unauthorized": {
+        "description": "(Unauthorized) You are not allowed to request data from the selected source. It happens because you don't provide a correct authorization token.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/unauthorized"
+            }
+          }
+        }
+      },
+      "serverError": {
+        "description": "(Internal Server Error) There was (were) unhandled error(s) coming from the external APIs.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/servererror"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "q": {
+        "name": "q",
+        "in": "query",
+        "description": "Words or phrases about which news will be searched.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 40
+        }
+      },
+      "source": {
+        "name": "source",
+        "in": "query",
+        "description": "The source from which you want to obtain the data. You will receive up to 20 elements if you request data from all the sources. In case you only need data from one source, you will receive up to 10 elements.",
+        "required": false,
+        "schema": {
+          "type": "string",
+          "minLength": 3,
+          "default": "all",
+          "enum": [
+            "nytimes",
+            "thguard",
+            "all"
+          ]
+        }
+      },
+      "page": {
+        "name": "page",
+        "in": "query",
+        "description": "The page from which you want to obtain the data.",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "schemas": {
+      "correctResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "nyt://article/3e9bcce8-a43d-5194-8ab6-ef1d39966110"
+            ],
+            "description": "News item unique ID assigned by the source API."
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "article"
+            ],
+            "description": "News item type."
+          },
+          "publication_date": {
+            "type": "string",
+            "enum": [
+              "2022-02-17T13:40:49+0000"
+            ],
+            "description": "Date and time the news item was published."
+          },
+          "abstract": {
+            "type": "string",
+            "enum": [
+              "This documentary on Netflix leaves the impression that the 737 Max’s entire existence is rotten."
+            ],
+            "description": "Small description about the content of the news item."
+          },
+          "byline": {
+            "type": "string",
+            "enum": [
+              "By Ben Kenigsberg"
+            ],
+            "description": "Line that describes who is the author of the news item."
+          },
+          "web_url": {
+            "type": "string",
+            "enum": [
+              "https://www.nytimes.com/2022/02/17/movies/downfall-the-case-against-boeing-review.html"
+            ],
+            "description": "Web url where you can find the news item in the source website."
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "The New York Times"
+            ],
+            "description": "The source of information that created the news item."
+          }
+        }
+      },
+      "badRequest": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "string",
+            "enum": [
+              "400"
+            ],
+            "description": "Status code of the response because of a bad request."
+          },
+          "message": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "enum": [
+              [
+                "q must be longer than or equal to 2 characters"
+              ]
+            ],
+            "description": "Reasons because of the server returned a bad request message."
+          },
+          "error": {
+            "type": "string",
+            "enum": [
+              "Bad Request"
+            ],
+            "description": "Status message of the response telling it was a bad request."
+          }
+        }
+      },
+      "notFound": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "string",
+            "enum": [
+              "404"
+            ],
+            "description": "Status code that indicates that any value was found"
+          },
+          "message": {
+            "type": "string",
+            "enum": [
+              "No data returned from the search query"
+            ],
+            "description": "Message that indicates that any value was found"
+          }
+        }
+      },
+      "unauthorized": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "string",
+            "enum": [
+              "401"
+            ],
+            "description": "Status code that indicates that you are not authorized to retrieve data."
+          },
+          "message": {
+            "type": "string",
+            "enum": [
+              "Access token is missing or invalid"
+            ],
+            "description": "Message that indicates that you are not authorized"
+          }
+        }
+      },
+      "servererror": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "string",
+            "enum": [
+              "500"
+            ],
+            "description": "Status code that indicates an internal server error."
+          }
+        }
+      }
+    }
+  }
+}
