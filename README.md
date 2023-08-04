@@ -1,6 +1,8 @@
 # News Aggregator RESTful API
 A RESTful API that allows you to search news from the New York Times and The Guardian APIs.
 
+This project was developed in 2022 as an excercise, I found the source code in an old account and I share it here as well.
+
 ## Get started
 This app is a RESTful API that. It was developed using NestJs Framework and both diaries APIs as Data sources.
 
